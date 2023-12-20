@@ -5,8 +5,8 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('apps.blog.urls'), namespace='blog'),
-	path('auth', include('apps.users.urls'), namespace='auth'),
+    path('', include(('apps.blog.urls'), namespace='blog')),
+	path('auth', include(('apps.users.urls'), namespace='auth')),
 	]
 
 # Configuración para servir archivos de medios durante el desarrollo
