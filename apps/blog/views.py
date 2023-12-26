@@ -105,7 +105,7 @@ class ContactoTemplateView(TemplateView):
     
 class ArticuloDetailView(DetailView):
     model = Articulo
-    template_name = 'blog_dev/detalle.html'
+    template_name = 'blog/detalle.html'
     context_object_name = 'articulo'
     slug_field = 'url'
     slug_url_kwarg = 'url'
@@ -115,9 +115,9 @@ class ArticuloDetailView(DetailView):
         context['articulos'] = Articulo.objects.filter(visible=True)
         context['categorias'] = Categoria.objects.all()
         context['comentarios'] = Comentario.objects.filter(
-            visible=True, auto=self.get_object()).all()
+            visible=True, articulo=self.get_object()).all()
         context['cantidad_comentarios'] = Comentario.objects.filter(
-            visible=True, auto=self.get_object()).all().count()
+            visible=True, articulo=self.get_object()).all().count()
         return context
     
 class ComentarioView(UserPassesTestMixin, View):
@@ -164,7 +164,7 @@ class CategoriaListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['categorias'] = Categoria.objects.all()
-        context['articulos_destacados'] = ArticuloDetailView.objects.filter(
+        context['articulos_destacados'] = Articulo.objects.filter(
             destacado=True, visible=True)
         return context
     

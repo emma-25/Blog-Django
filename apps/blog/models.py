@@ -32,7 +32,7 @@ class CategoriaAutor(models.Model):
         ordering = ('categoria',)
 
     def __str__(self):
-        return f'{self.articulo} - {self.categoria}'
+        return f'{self.autor} - {self.categoria}'
     
 class Articulo(models.Model):
     categoria_autor = models.ForeignKey(CategoriaAutor, on_delete=models.CASCADE)
@@ -76,4 +76,5 @@ class Contacto(models.Model):
     mensaje = models.TextField()
     creado = models.DateTimeField(auto_now_add=True)
     modificado = models.DateTimeField(auto_now=True)
+
     
