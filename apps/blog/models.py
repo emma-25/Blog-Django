@@ -1,10 +1,10 @@
-from collections.abc import Iterable
 from django.db import models
 
 from django.utils.text import slugify
-from django.contrib.auth import User
+from django.contrib.auth import get_user_model
+User = get_user_model()
 from ckeditor.fields import RichTextField
-from users.models import Perfil
+from apps.users.models import Perfil
 
 class Categoria(models.Model):
     nombre = models.CharField(max_length=255, unique=True)
@@ -37,7 +37,7 @@ class CategoriaAutor(models.Model):
 class Articulo(models.Model):
     categoria_autor = models.ForeignKey(CategoriaAutor, on_delete=models.CASCADE)
     nombre = models.CharField(max_length=255, unique=True)
-    users = models.ForeignKey(User, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
     perfil = models.ForeignKey(Perfil, on_delete=models.PROTECT)
     titulo = models.CharField(max_length=255, unique=True)
     url = models.SlugField(max_length=255, unique=True)
@@ -51,7 +51,7 @@ class Articulo(models.Model):
     imagen = models.ImageField(upload_to='articulo/imagenes/')
 
     class Meta:
-        ordering = ('creado',)
+        ordering = ('creacion',)
 
     def save(self, *args, **kwargs):
         self.url = slugify(self.titulo)
@@ -62,11 +62,18 @@ class Articulo(models.Model):
     
 
 class Comentario(models.Model):
-    users = models.ForeignKey(User, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
     perfil = models.ForeignKey(Perfil, on_delete=models.PROTECT)
     articulo = models.ForeignKey(Articulo, on_delete=models.PROTECT)
     comentario = models.CharField(max_length=5000)
     visible = models.BooleanField(default=True)
     creado = models.DateTimeField(auto_now_add=True)
 
+class Contacto(models.Model):
+    nombre = models.CharField(max_length=70)
+    email = models.EmailField(max_length=50)
+    asunto = models.CharField(max_length=100)
+    mensaje = models.TextField()
+    creado = models.DateTimeField(auto_now_add=True)
+    modificado = models.DateTimeField(auto_now=True)
     

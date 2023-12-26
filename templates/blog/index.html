@@ -1,0 +1,181 @@
+{% extends "blog_dev/base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block titulo %}Inicio{% endblock titulo %}
+
+{% block contenido %}
+
+    <!-- Page Content -->
+    <!-- Banner Starts Here -->
+    <div class="main-banner header-text">
+      <div class="container-fluid">
+        <div class="owl-banner owl-carousel">
+
+          <!-- Inicio Post Destacados -->
+          {% for articulo in articulos_destacados %}
+            <div class="item">
+              <img src="{{ articulo.imagen.url }}" alt="">
+              <div class="item-content">
+                <div class="main-content">
+                  <div class="meta-category">
+                    <span></span>
+                  </div>
+                  <a href="{% url "blog:detalle" articulo.url %}"><h4>{{ articulo.categoria_autor }}</h4></a>
+                  <ul class="post-info">
+                    <li><a href="{% url "blog:user" articulo.user %}">{{ articulo.user }}</a></li>
+                    <li><a href="#">{{ articulo.creacion|date: "d M Y" }}</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+          <!-- Fin Post Destacados -->
+        </div>
+      </div>
+    </div>
+
+
+    <section class="blog-posts">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8">
+            <div class="all-blog-posts">
+              <div class="row">
+
+                <!-- Inicio Posts -->
+                {% for articulo in articulos %}
+                  <div class="col-lg-12">
+                    <div class="blog-post">
+                      <div class="blog-thumb">
+                        <img src="{{ articulo.imagen.url }}" alt="">
+                      </div>
+                      <div class="down-content">
+                        <span></span>
+                        <a href="{% url "blog:detalle" articulo.url %}">
+                          <h4>{{ articulo.categoria_autor }}</h4></a>
+                        <ul class="post-info">
+                          <li><a href="{% url "blog:user" articulo.user %}">{{ articulo.user }}</a></li>
+                          <li><a href="#">{{ articulo.creacion|date: "d M Y" }}</a></li>
+                          <li><a href="#">12 Comments</a></li>
+                        </ul>
+                        {{ articulo.resumen|safe }}
+                        <div class="post-options">
+                          <div class="row">
+                            <div class="col-6">
+                            </div>
+                            <div class="col-6">
+                              <ul class="post-share">
+                                <li><i class="fa fa-share-alt"></i></li>
+                                <li><a href="#">Facebook</a>,</li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+                <!-- Fin Posts -->
+
+
+              <!-- Inicio Paginador -->
+              <div class="col-lg-12">  
+                <nav aria-label="...">
+                  <ul class="pagination justify-content-center">
+                    <li class="page-item"><a class="page-link" href="?page=1">Inicio</a></li>
+
+                    {% if page_obj.has_previous %}
+                      <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+                      </li>
+                    {% else %}
+                      <li class="page-item page-link disabled">Anterior</li>
+                    {% endif %}
+
+                    <li class="page-item page-link active">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</li>
+                    
+                    {% if page_obj.has_next %}
+                      <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+                      </li>
+                    {% else %}
+                      <li class="page-item disabled page-link">Siguiente</li>
+                    {% endif %}
+                    
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Última</a></li>
+
+                  </ul>
+                </nav>
+              </div>
+              <!-- Fin Paginador -->
+
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="sidebar">
+              <div class="row">
+
+                <!-- Inicio Barra Búsqueda -->
+                <div class="col-lg-12">
+                  <div class="sidebar-item search">
+                    <form id="search_form" name="gs" method="GET" action="#">
+                      <input type="text" name="q" class="searchText" placeholder="type to search..." autocomplete="on">
+                    </form>
+                  </div>
+                </div>
+                <!-- Fin Barra Búsqueda  -->
+
+                <div class="col-lg-12">
+                  <div class="sidebar-item recent-posts">
+                    <div class="sidebar-heading">
+                      <h2>Posts Recientes</h2>
+                    </div>
+                    <div class="content">}
+                      <ul>
+
+                        <!-- Inicio Posts reciente-->
+                        {% for articulo in articulos %}
+                          {% if foorloop.counter <= 3 %}
+                            <li>
+                              <a href=>"{% url "blog:detalle" articulo.url %}">
+                                <h5>{{ articulo.titulo }}</h5>
+                                <span>{{ articulo.creacion }}</</span>
+                              </a>
+                            </li>
+                          {% endif %}
+                        {% endfor %}
+                        <!-- Fin Posts reciente-->
+
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-12">
+                  <div class="sidebar-item categories">
+                    <div class="sidebar-heading">
+                      <h2>Categorias</h2>
+                    </div>
+                    <div class="content">
+                      <ul>
+                        
+                        <!-- Inicio Categorias-->
+                        {% for categoria in categorias %}
+                          <li><a href="{% url "blog:categoria" categoria.id %}">{{ categoria.nombre }}</a></li>
+                        {% endfor %}
+                        <!-- Fin Categorias-->
+                        
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {% endblock contenido %}
+    
