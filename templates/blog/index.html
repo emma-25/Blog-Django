@@ -56,7 +56,7 @@
                           <h4>{{ articulo.categoria_autor }}</h4></a>
                         <ul class="post-info">
                           <li><a href="{% url "blog:user" articulo.user %}">{{ articulo.user }}</a></li>
-                          <li><a href="#">{{ articulo.creacion|date: "d M Y" }}</a></li>
+                          <li><a href="#">{{ articulo.creacion|date:"d M Y" }}</a></li>
                           <li><a href="#">12 Comments</a></li>
                         </ul>
                         {{ articulo.resumen|safe }}
