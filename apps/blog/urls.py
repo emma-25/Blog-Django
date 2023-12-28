@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import InicioListView, NosotrosTemplateView, ContactoFormView, ContactoTemplateView, ArticuloDetailView, ArticuloCreateView, ArticuloUpdateView, ArticuloDeleteView, ComentarioView, CategoriaListView, UserListView
+from .views import InicioListView, NosotrosTemplateView, ContactoFormView, ContactoTemplateView, ArticuloDetailView, ArticuloCreateView, ArticuloUpdateView, ArticuloDeleteView, ComentarioCreateView, ComentarioDeleteView, CategoriaListView, UserListView, OrdenarZAListView, OrdenarAZListView, OrdenarMasAntiguoListView, OrdenarMasNuevoListView
 
-app_name = 'apps.agencia'
+app_name = 'apps.blog'
 
 urlpatterns = [
     path(
@@ -46,8 +46,13 @@ urlpatterns = [
     ),
     path(
         route='comentario/',
-        view=ComentarioView.as_view(),
+        view=ComentarioCreateView.as_view(),
         name='comentario'
+    ),
+    path(
+        route='eliminar_comentario/<int:pk>/',
+        view=ComentarioDeleteView.as_view(),
+        name='eliminar_comentario'
     ),
     path(
         route='categoria/<int:categoria_id>/',
@@ -58,5 +63,25 @@ urlpatterns = [
         route='user/<str:nombre>/',
         view=UserListView.as_view(),
         name='user'
+    ),
+    path(
+        route='post_orden_mas_nuevos/',
+        view=OrdenarMasNuevoListView.as_view(),
+        name='ordenar_mas_nuevo'
+    ),
+    path(
+        route='post_orden_mas_antiguos/',
+        view=OrdenarMasAntiguoListView.as_view(),
+        name='ordenar_mas_antiguo'
+    ),   
+    path(
+        route='post_orden_A_Z/',
+        view=OrdenarAZListView.as_view(),
+        name='ordenar_A_Z'
+    ),   
+    path(
+        route='post_orden_Z_A/',
+        view=OrdenarZAListView.as_view(),
+        name='ordenar_Z_A'
     ),
 ]

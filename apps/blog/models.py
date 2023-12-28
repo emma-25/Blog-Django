@@ -36,7 +36,6 @@ class CategoriaAutor(models.Model):
     
 class Articulo(models.Model):
     categoria_autor = models.ForeignKey(CategoriaAutor, on_delete=models.CASCADE)
-    nombre = models.CharField(max_length=255, unique=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     perfil = models.ForeignKey(Perfil, on_delete=models.PROTECT)
     titulo = models.CharField(max_length=255, unique=True)

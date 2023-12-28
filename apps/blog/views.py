@@ -1,13 +1,14 @@
 import os
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseServerError
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import TemplateView, FormView, ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Categoria, Articulo, Comentario, Contacto
-from .forms import CrearComentarioForm, ArticuloForm, ContactoForm 
+from .forms import CrearComentarioForm, ArticuloForm, ContactoForm
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 
 class ArticuloCreateView(UserPassesTestMixin, CreateView):
     model = Articulo
@@ -78,18 +79,76 @@ class ArticuloDeleteView(UserPassesTestMixin, DeleteView):
                 os.remove(image_path)
 
         return super().form_valid(form)
+    
+class OrdenarMasNuevoListView(ListView):
+    model = Articulo
+    template_name = 'blog/index.html'
+    context_object_name = 'articulos'
+    paginate_by = 2
+    queryset = Articulo.objects.filter(visible=True).order_by('-creacion')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categoria'] = Categoria.objects.all()
+        context['articulos_destacados'] = Articulo.objects.filter(
+            destacado=True, visible=True)
+        return context
+    
+class OrdenarAZListView(ListView):
+    model = Articulo
+    template_name = 'blog/index.html'
+    context_object_name = 'articulos'
+    paginate_by = 2
+    queryset = Articulo.objects.filter(visible=True).order_by('titulo')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categoria'] = Categoria.objects.all()
+        context['articulos_destacados'] = Articulo.objects.filter(
+            destacado=True, visible=True)
+        return context
+    
+class OrdenarZAListView(ListView):
+    model = Articulo
+    template_name = 'blog/index.html'
+    context_object_name = 'articulos'
+    paginate_by = 2
+    queryset = Articulo.objects.filter(visible=True).order_by('-titulo')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categoria'] = Categoria.objects.all()
+        context['articulos_destacados'] = Articulo.objects.filter(
+            destacado=True, visible=True)
+        return context    
+    
+class OrdenarMasAntiguoListView(ListView):
+    model = Articulo
+    template_name = 'blog/index.html'
+    context_object_name = 'articulos'
+    paginate_by = 2
+    queryset= Articulo.objects.filter(visible=True).order_by('creacion')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categoria'] = Categoria.objects.all()
+        context['articulos_destacados'] = Articulo.objects.filter(
+            destacado=True, visible=True)
+        return context
 
 class InicioListView(ListView):
     model = Articulo
     template_name = 'blog/index.html'
     context_object_name = 'articulos'
-    ordering = ('-creacion',) 
+    paginate_by = 2
+    ordering = ('-creacion',)
     queryset = Articulo.objects.filter(visible=True)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['articulos'] = Articulo.objects.all()
-        context['articulos_destacados'] = Articulo.objects.filter(destacado=True, visible=True)
+        context['categoria'] = Categoria.objects.all()
+        context['articulos_destacados'] = Articulo.objects.filter(
+            destacado=True, visible=True)
         return context
     
 class NosotrosTemplateView(TemplateView):
@@ -120,7 +179,9 @@ class ArticuloDetailView(DetailView):
             visible=True, articulo=self.get_object()).all().count()
         return context
     
-class ComentarioView(UserPassesTestMixin, View):
+class ComentarioCreateView(UserPassesTestMixin, CreateView):
+    model = Comentario
+    form_class = CrearComentarioForm
     template_name = 'blog/detalle.html'
     login_url = reverse_lazy('auth:login')
 
@@ -129,23 +190,33 @@ class ComentarioView(UserPassesTestMixin, View):
         return self.request.user.is_authenticated and any(self.request.user.groups.filter(name=grupo).exists() for grupo in grupos)
 
     def get(self, request, *args, **kwargs):
-        return HttpResponse(status=405)
+        return HttpResponseForbidden("Acceso denegado. Método no permitido.")
 
-    def post(self, request, *args, **kwargs):
-        url = request.POST.get('url')
-        articulo = {
-            'user': request.user.id,
-            'perfil': request.user.perfil.id,
-            'comentario': request.POST.get('comentario'),
-            'articulo': request.POST.get('articulo')
-        }
-        form = CrearComentarioForm(articulo)
-        if form.is_valid():
-            form.save()
-            return redirect('blog:detalle', url=url)
-        else:
-            return HttpResponse(status=500)
-    
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        form.instance.perfil = self.request.user.perfil
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        url = self.request.POST.get('url')
+        return reverse_lazy('blog:detalle', kwargs={'url': url})
+
+    def form_invalid(self, form):
+        return HttpResponseServerError("Error interno al procesar el formulario.")
+
+
+class ComentarioDeleteView(UserPassesTestMixin, DeleteView):
+    model = Comentario
+    login_url = reverse_lazy('auth:login')
+
+    def test_func(self):
+        grupos = ['Administrador']
+        return self.request.user.is_authenticated and any(self.request.user.groups.filter(name=grupo).exists() for grupo in grupos) or self.request.user == self.get_object().user
+
+    def get_success_url(self):
+        url = self.object.articulo.url
+        return reverse_lazy('blog:detalle', kwargs={'url': url})
+
 class CategoriaListView(ListView):
     model = Articulo
     template_name = 'blog/index.html'
@@ -174,7 +245,7 @@ class UserListView(ListView):
     context_object_name = 'articulos'
     paginate_by = 2
     ordering = ('-creacion',)
-
+    
     def get_queryset(self):
         articulo = None
         if self.kwargs['nombre']:
@@ -189,5 +260,4 @@ class UserListView(ListView):
         context['articulos_destacados'] = Articulo.objects.filter(
             destacado=True, visible=True)
         return context
-
 
