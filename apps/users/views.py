@@ -6,6 +6,9 @@ from django.urls import reverse_lazy
 from django.shortcuts import redirect, render
 from django.views.generic import TemplateView, FormView
 from .forms import RegistroForm
+from django.contrib.auth.models import Group
+from django.views import View
+
 
 class RegistroView(FormView):
     form_class = RegistroForm
@@ -18,6 +21,7 @@ class RegistroView(FormView):
             user = form.save()
             login(self.request, user)
             return super().form_valid(form)
+            
         except IntegrityError:
             # Si hay un error de integridad (username duplicado), agrega un mensaje de error al formulario
             form.add_error('username', 'Este nombre de usuario no está disponible. Por favor, elige otro.')
@@ -34,7 +38,8 @@ class RegistroOkTemplateView(LoginRequiredMixin, TemplateView):
 class LoginView(LoginView):
     template_name = 'user/login.html'
 
-class SalirView(LoginRequiredMixin, LogoutView):
+class CustomLogoutView(View):
     def get(self, request, *args, **kwargs):
         logout(request)
+        # Redirigir a la página de inicio o a donde desees después del cierre de sesión
         return redirect(reverse_lazy('auth:login'))

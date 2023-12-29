@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import LoginView, RegistroView, RegistroOkTemplateView, SalirView
+from .views import LoginView, RegistroView, RegistroOkTemplateView, CustomLogoutView
 
 app_name = 'apps.users'
 
@@ -17,9 +17,9 @@ urlpatterns = [
         name='registro'
     ),
     path(
-        route='salir/',
-        view=SalirView.as_view(),
-        name='salir'
+        route='logout/',
+        view=CustomLogoutView.as_view(),
+        name='logout'
     ),
     path(
         route='registro_completado/',
